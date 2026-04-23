@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+  * {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  body {
+    background: #fff !important;
+    margin: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-container {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  p {
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  h1, h2, h3, h4 {
+    text-align: center;
+  }
+
+  .assinatura {
+    margin-top: 80px;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+
+  .assinatura-linha {
+    margin: 40px auto 10px;
+    width: 250px;
+    border-top: 1px solid #000;
+  }
+}
+
