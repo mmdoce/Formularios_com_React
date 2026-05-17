@@ -163,7 +163,7 @@ export default function FormularioPsicoterapia({ onBack }) {
 
             <div className="grid grid-cols-3 gap-4">
               <input name="sessao" placeholder="Sessão" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input type="date" name="data" onChange={handleChange} className="p-2 border rounded-lg" />
+              <input type="date" placeholder="Data da sesseão" name="data" onChange={handleChange} className="p-2 border rounded-lg" />
               <input name="diaSemana" placeholder="Dia da Semana" onChange={handleChange} className="p-2 border rounded-lg" />
               <input name="horario" placeholder="Horário" onChange={handleChange} className="p-2 border rounded-lg" />
               <input name="sala" placeholder="Sala" onChange={handleChange} className="p-2 border rounded-lg" />
