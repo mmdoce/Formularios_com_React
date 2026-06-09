@@ -58,7 +58,7 @@ export default function FormularioPAS({ onBack }) {
     };
 
     // ── CABEÇALHO ──────────────────────────────────────────────
-    pdf.setFillColor(30, 30, 30);
+    pdf.setFillColor(240, 240, 240);  // cor do fundo do cabeçalho 
     pdf.rect(0, 0, pageWidth, 18, "F");
 
     pdf.setTextColor(255, 255, 255);
