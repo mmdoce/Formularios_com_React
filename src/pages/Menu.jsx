@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DocInicial from "../components/DocInicial";
 import FormularioPAS from "../components/FormularioPAS";
 import FormularioPsicoterapia from "../components/FormularioPsicoterapia";
 import Mensalidades from "../components/Mensalidades";
@@ -19,10 +20,17 @@ export default function Menu() {
 
             <div className="flex flex-col gap-4 mt-6">
               <button
+                onClick={() => setScreen("Docinicial")}
+                className="bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition font-medium"
+              >
+                ✅ Avaliação Psicológica Inical / Sessão de Inicio 
+              </button>
+
+              <button
                 onClick={() => setScreen("pas")}
                 className="bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-medium"
               >
-                📋 Relatório PAS
+                📋 Relatório PAS / Sessão inicial
               </button>
 
               <button
@@ -31,15 +39,19 @@ export default function Menu() {
               >
                 🧠 Psicoterapia Individual / Sessão Rotina
               </button>
-
+              
               <button
                 onClick={() => setScreen("mensalidades")}
                 className="bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-700 transition font-medium"
               >
-                💰 Controle de Mensalidades
+                💰 Controle de Mensalidades - em manutenção!!!!
               </button>
             </div>
           </div>
+        )}
+
+        {screen === "Docinicial" && (
+          <DocInicial onBack={() => setScreen("menu")} />
         )}
 
         {screen === "pas" && (
