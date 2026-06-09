@@ -61,7 +61,7 @@ export default function FormularioPAS({ onBack }) {
     pdf.setFillColor(240, 240, 240);  // cor do fundo do cabeçalho 
     pdf.rect(0, 0, pageWidth, 18, "F");
 
-    pdf.setTextColor(255, 255, 255);
+    pdf.setTextColor(30, 30, 30);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(13);
     pdf.text("CENTRO DE RECUPERAÇÃO ÁTRIO", pageWidth / 2, 8, { align: "center" });
