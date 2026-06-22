@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Contrato from "../components/Contrato";
 import DocInicial from "../components/DocInicial";
 import FormularioPAS from "../components/FormularioPAS";
 import FormularioPsicoterapia from "../components/FormularioPsicoterapia";
@@ -20,10 +21,17 @@ export default function Menu() {
 
             <div className="flex flex-col gap-4 mt-6">
               <button
-                onClick={() => setScreen("Docinicial")}
-                className="bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition font-medium"
+                onClick={() => setScreen("contrato")}
+                className="bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition font-medium"
               >
-                ✅ Avaliação Psicológica Inical / Sessão de Inicio 
+                📄 Contrato
+              </button>
+
+              <button
+                onClick={() => setScreen("docinicial")}
+                className="bg-teal-600 text-white py-3 rounded-xl hover:bg-teal-700 transition font-medium"
+              >
+                ✅ Avaliação Psicológica Inicial / Sessão de Início
               </button>
 
               <button
@@ -39,18 +47,22 @@ export default function Menu() {
               >
                 🧠 Psicoterapia Individual / Sessão Rotina
               </button>
-              
+
               <button
                 onClick={() => setScreen("mensalidades")}
                 className="bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-700 transition font-medium"
               >
-                💰 Controle de Mensalidades - em manutenção!!!!
+                em manutenção!!!!  💰 Controle de Mensalidades
               </button>
             </div>
           </div>
         )}
 
-        {screen === "Docinicial" && (
+        {screen === "contrato" && (
+          <Contrato onBack={() => setScreen("menu")} />
+        )}
+
+        {screen === "docinicial" && (
           <DocInicial onBack={() => setScreen("menu")} />
         )}
 

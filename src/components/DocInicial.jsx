@@ -20,6 +20,14 @@ export default function DocInicial({ onBack }) {
     // Seções narrativas
     historicoUso: "",
     historicoFamiliar: "",
+    procedimentos: {
+      entrevista: false,
+      observacao: false,
+      anamnese: false,
+      analiseDocumental: false,
+      outros: false,
+    },
+
     condicoesSaude: "",
     aspectosPsicologicos: "",
     fatoresRiscoProtecao: "",
@@ -28,7 +36,7 @@ export default function DocInicial({ onBack }) {
     // Assinaturas
     nomePsicologo: "",
     crp: "",
-    nomeTerapeuta: "",
+    nomeEstagiario: "",
     funcaoTerapeuta: "",
     registroTerapeuta: "",
   });
@@ -36,8 +44,18 @@ export default function DocInicial({ onBack }) {
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleProcedimentoChange = (key) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      procedimentos: { ...prev.procedimentos, [key]: e.target.checked },
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -178,7 +196,7 @@ export default function DocInicial({ onBack }) {
     pdf.text(formData.sexo || "___________", pageWidth / 2 + 32, y);
     y += 7;
 
-    // Linha: Estado civil | Escolaridade | Profissão
+    // Linha: Estado civil | Escolaridade
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
     pdf.setTextColor(50, 50, 50);
@@ -227,17 +245,33 @@ export default function DocInicial({ onBack }) {
 
     // ── III. PROCEDIMENTOS ─────────────────────────────────────
     renderSecao("III — PROCEDIMENTOS UTILIZADOS");
+
+    const procedimentosLabels = {
+      entrevista: "Entrevista psicológica",
+      observacao: "Observação clínica",
+      anamnese: "Anamnese",
+      analiseDocumental: "Análise documental",
+      outros: "Outros procedimentos pertinentes",
+    };
+
+    const procedimentosSelecionados = Object.entries(formData.procedimentos || {})
+      .filter(([, marcado]) => marcado)
+      .map(([key]) => procedimentosLabels[key]);
+
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(8.5);
-    pdf.setTextColor(60, 60, 60);
-    pdf.splitTextToSize(
-      "Entrevista psicológica, observação clínica, anamnese, análise documental e outros procedimentos pertinentes.",
-      contentWidth - 4
-    ).forEach((l) => {
-      checkPageBreak(6);
-      pdf.text(l, marginLeft + 2, y);
+    pdf.setFontSize(9);
+    pdf.setTextColor(0, 0, 0);
+
+    if (procedimentosSelecionados.length > 0) {
+      procedimentosSelecionados.forEach((item) => {
+        checkPageBreak(6);
+        pdf.text(`• ${item}`, marginLeft + 2, y);
+        y += 5.5;
+      });
+    } else {
+      pdf.text("Nenhum procedimento selecionado.", marginLeft + 2, y);
       y += 5.5;
-    });
+    }
     y += 5;
 
     // ── SEÇÕES NARRATIVAS ──────────────────────────────────────
@@ -247,8 +281,7 @@ export default function DocInicial({ onBack }) {
       { titulo: "VI — CONDIÇÕES DE SAÚDE", campo: formData.condicoesSaude },
       {
         titulo: "VII — ASPECTOS PSICOLÓGICOS OBSERVADOS",
-        campo:
-          formData.aspectosPsicologicos,
+        campo: formData.aspectosPsicologicos,
         subtitulo:
           "Estado emocional, humor, cognição, atenção, memória, juízo crítico, insight e motivação para tratamento.",
       },
@@ -301,7 +334,6 @@ export default function DocInicial({ onBack }) {
     renderSecao("ASSINATURAS");
 
     const colA = marginLeft;
-    const colB = pageWidth / 2 + 5;
     const lineW = 70;
 
     // Psicólogo
@@ -325,15 +357,15 @@ export default function DocInicial({ onBack }) {
     pdf.text("Assinatura", colA, y);
     y += 10;
 
-    // Terapeuta / Equipe
+    // Estagiário / Equipe
     checkPageBreak(35);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
     pdf.setTextColor(30, 30, 30);
-    pdf.text("Terapeuta / Membro da Equipe Técnica", colA, y);
+    pdf.text("Estagiario Supervisionado", colA, y);
     pdf.setFont("helvetica", "normal");
     y += 6;
-    pdf.text(`Nome: ${formData.nomeTerapeuta || "______________________________"}`, colA, y);
+    pdf.text(`Nome: ${formData.nomeEstagiario || "______________________________"}`, colA, y);
     y += 6;
     pdf.text(`Função: ${formData.funcaoTerapeuta || "____________________________"}`, colA, y);
     y += 6;
@@ -395,21 +427,9 @@ export default function DocInicial({ onBack }) {
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide border-b pb-1">Dados da Instituição</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={labelClass}>Instituição</label>
-                  <input name="instituicao" placeholder="Nome da instituição" onChange={handleChange} className={inputClass} />
-                </div>
-                <div>
                   <label className={labelClass}>Prontuário nº</label>
                   <input name="prontuario" placeholder="Número do prontuário" onChange={handleChange} className={inputClass} />
                 </div>
-              </div>
-              <div>
-                <label className={labelClass}>Endereço</label>
-                <input name="endereco" placeholder="Endereço completo" onChange={handleChange} className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>Telefone</label>
-                <input name="telefone" placeholder="(00) 00000-0000" onChange={handleChange} className={inputClass} />
               </div>
             </div>
 
@@ -477,18 +497,87 @@ export default function DocInicial({ onBack }) {
               </div>
             </div>
 
-            {/* Seções narrativas */}
+            {/* Seções narrativas (IV e V) */}
             {[
-              { label: "IV – Histórico do Uso de Substâncias", name: "historicoUso", hint: "Substâncias utilizadas, frequência, tempo de uso, padrão de consumo..." },
-              { label: "V – Histórico Familiar e Social", name: "historicoFamiliar", hint: "Dinâmica familiar, suporte social, vínculos significativos..." },
-              { label: "VI – Condições de Saúde", name: "condicoesSaude", hint: "Diagnósticos, medicações em uso, internações anteriores..." },
-              { label: "VII – Aspectos Psicológicos Observados", name: "aspectosPsicologicos", hint: "Estado emocional, humor, cognição, atenção, memória, juízo crítico, insight e motivação para tratamento..." },
-              { label: "VIII – Fatores de Risco e Proteção", name: "fatoresRiscoProtecao", hint: "Fatores que aumentam ou diminuem o risco de recaída..." },
-              { label: "IX – Impressão Psicológica", name: "impressaoPsicologica", hint: "Síntese clínica e hipóteses diagnósticas..." },
-              { label: "X – Recomendações", name: "recomendacoes", hint: "Encaminhamentos, intervenções sugeridas, metas terapêuticas..." },
+              {
+                label: "IV – Histórico do Uso de Substâncias",
+                name: "historicoUso",
+                hint: "Substâncias utilizadas, frequência, tempo de uso, padrão de consumo..."
+              },
+              {
+                label: "V – Histórico Familiar e Social",
+                name: "historicoFamiliar",
+                hint: "Dinâmica familiar, suporte social, vínculos significativos..."
+              }
             ].map((field) => (
               <div key={field.name}>
-                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide border-b pb-1 mb-3">{field.label}</h2>
+                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide border-b pb-1 mb-3">
+                  {field.label}
+                </h2>
+                <textarea
+                  name={field.name}
+                  placeholder={field.hint}
+                  onChange={handleChange}
+                  rows={5}
+                  className={`${inputClass} resize-y`}
+                />
+              </div>
+            ))}
+
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide border-b pb-1">
+                III – Procedimentos Utilizados
+              </h2>
+              {[
+                { key: "entrevista", label: "Entrevista psicológica" },
+                { key: "observacao", label: "Observação clínica" },
+                { key: "anamnese", label: "Anamnese" },
+                { key: "analiseDocumental", label: "Análise documental" },
+                { key: "outros", label: "Outros procedimentos pertinentes" },
+              ].map((item) => (
+                <label key={item.key} className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.procedimentos[item.key]}
+                    onChange={handleProcedimentoChange(item.key)}
+                    className="h-4 w-4"
+                  />
+                  {item.label}
+                </label>
+              ))}
+            </div>
+
+            {[
+              {
+                label: "VI – Condições de Saúde",
+                name: "condicoesSaude",
+                hint: "Diagnósticos, medicações em uso, internações anteriores..."
+              },
+              {
+                label: "VII – Aspectos Psicológicos Observados",
+                name: "aspectosPsicologicos",
+                hint: "Estado emocional, humor, cognição, atenção, memória, juízo crítico, insight e motivação para tratamento..."
+              },
+              {
+                label: "VIII – Fatores de Risco e Proteção",
+                name: "fatoresRiscoProtecao",
+                hint: "Fatores que aumentam ou diminuem o risco de recaída..."
+              },
+              {
+                label: "IX – Impressão Psicológica",
+                name: "impressaoPsicologica",
+                hint: "Síntese clínica e hipóteses diagnósticas..."
+              },
+              {
+                label: "X – Recomendações",
+                name: "recomendacoes",
+                hint: "Encaminhamentos, intervenções sugeridas, metas terapêuticas..."
+              }
+            ].map((field) => (
+              <div key={field.name}>
+                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide border-b pb-1 mb-3">
+                  {field.label}
+                </h2>
                 <textarea
                   name={field.name}
                   placeholder={field.hint}
@@ -514,8 +603,8 @@ export default function DocInicial({ onBack }) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className={labelClass}>Nome do Terapeuta / Técnico</label>
-                  <input name="nomeTerapeuta" placeholder="Nome completo" onChange={handleChange} className={inputClass} />
+                  <label className={labelClass}>Estagiario Supervisionado</label>
+                  <input name="nomeEstagiario" placeholder="Nome completo" onChange={handleChange} className={inputClass} />
                 </div>
                 <div>
                   <label className={labelClass}>Função</label>
