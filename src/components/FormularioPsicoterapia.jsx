@@ -1,200 +1,68 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import jsPDF from "jspdf";
 
+const initialData = {
+  nome: "", data: "", horario: "", modalidade: "presencial individual",
+  outraModalidade: "", demanda: "", procedimentos: "", evolucao: "",
+  conduta: "", psicologa: "", crp: "",
+};
+
+const sections = [
+  ["demanda", "Demanda ou objetivo do encontro"],
+  ["procedimentos", "Procedimentos e intervenções realizados"],
+  ["evolucao", "Evolução e aspectos relevantes para a continuidade do cuidado"],
+  ["conduta", "Conduta, planejamento e encaminhamentos"],
+];
+
 export default function FormularioPsicoterapia({ onBack }) {
-  const [formData, setFormData] = useState({
-    nome: "",
-    prontuario: "",
-    sexo: "",
-    idade: "",
-    nomeMae: "",
-    idadeMae: "",
-    nomePai: "",
-    idadePai: "",
-    sessao: "",
-    data: "",
-    diaSemana: "",
-    horario: "",
-    sala: "",
-    queixa: "",
-    descricao: "",
-    analise: "",
-    psicologo: "",
-    crp: ""
-  });
+  const [data, setData] = useState(initialData);
+  const [ready, setReady] = useState(false);
+  const update = ({ target: { name, value } }) => setData((current) => ({ ...current, [name]: value }));
 
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  // 🔥 PDF REAL (igual o outro que te passei)
-  const handleDownloadPDF = () => {
-    const pdf = new jsPDF("p", "mm", "a4");
-
+  const downloadPdf = () => {
+    const pdf = new jsPDF();
     let y = 20;
-
-    const checkPageBreak = (space = 10) => {
-      if (y + space > 280) {
-        pdf.addPage();
-        y = 20;
-      }
+    const addBlock = (title, value) => {
+      const lines = pdf.splitTextToSize(value || "", 170);
+      if (y + 12 + lines.length * 6 > 280) { pdf.addPage(); y = 20; }
+      pdf.setFont("helvetica", "bold"); pdf.text(title, 20, y); y += 7;
+      pdf.setFont("helvetica", "normal");
+      if (lines.length) { pdf.text(lines, 20, y); y += lines.length * 6; }
+      y += 5;
     };
-
-    // TÍTULO
-    pdf.setFont("Times", "bold");
-    pdf.setFontSize(14);
-    pdf.text("CENTRO DE RECUPERAÇÃO ÁTRIO", 105, y, { align: "center" });
-
-    y += 6;
-    pdf.setFontSize(12);
-    pdf.text("RELATÓRIO DE PSICOTERAPIA", 105, y, { align: "center" });
-
-    y += 10;
-
-    // LINHA DUPLA (igual documento)
-    const linha = (l1, v1, l2, v2) => {
-      checkPageBreak();
-
-      pdf.setFont("Times", "bold");
-      pdf.text(l1, 20, y);
-      pdf.setFont("Times", "normal");
-      pdf.text(v1 || "", 50, y);
-
-      if (l2) {
-        pdf.setFont("Times", "bold");
-        pdf.text(l2, 110, y);
-        pdf.setFont("Times", "normal");
-        pdf.text(v2 || "", 140, y);
-      }
-
-      y += 7;
-    };
-
-    // DADOS
-    linha("Nome:", formData.nome, "Prontuário:", formData.prontuario);
-    linha("Sexo:", formData.sexo, "Idade:", formData.idade);
-    linha("Nome da Mãe:", formData.nomeMae, "Idade:", formData.idadeMae);
-    linha("Nome do Pai:", formData.nomePai, "Idade:", formData.idadePai);
-
-    y += 5;
-
-    linha("Sessão:", formData.sessao, "Data:", formData.data);
-    linha("Dia:", formData.diaSemana, "Horário:", formData.horario);
-    linha("Sala:", formData.sala);
-
-    y += 10;
-
-    // REGISTRO
-    pdf.setFont("Times", "bold");
-    pdf.text("REGISTRO DOCUMENTAL", 105, y, { align: "center" });
-
-    y += 10;
-
-    const bloco = (titulo, texto) => {
-      checkPageBreak(20);
-
-      pdf.setFont("Times", "bold");
-      pdf.text(titulo, 20, y);
-      y += 6;
-
-      pdf.setFont("Times", "normal");
-
-      const linhas = pdf.splitTextToSize(texto || "", 170);
-      pdf.text(linhas, 20, y);
-
-      y += linhas.length * 6 + 6;
-    };
-
-    bloco("1. Queixa Inicial:", formData.queixa);
-    bloco("2. Descrição da Sessão:", formData.descricao);
-    bloco("3. Análise da Sessão:", formData.analise);
-
-    // ASSINATURA
-    checkPageBreak(30);
-
-    y += 10;
-    pdf.line(60, y, 150, y);
-    y += 6;
-
-    pdf.text(formData.psicologo || "Nome do Psicólogo", 105, y, {
-      align: "center",
-    });
-
-    y += 6;
-    pdf.text(`CRP: ${formData.crp || "__________"}`, 105, y, {
-      align: "center",
-    });
-
-    pdf.save(`psicoterapia-${formData.nome || "relatorio"}.pdf`);
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+    pdf.text("REGISTRO DE ATENDIMENTO PSICOLÓGICO INDIVIDUAL", 105, y, { align: "center" });
+    y += 14; pdf.setFontSize(10);
+    addBlock("Identificação da pessoa atendida", data.nome);
+    addBlock("Data do atendimento", data.data ? new Date(`${data.data}T12:00:00`).toLocaleDateString("pt-BR") : "");
+    addBlock("Horário", data.horario);
+    addBlock("Modalidade", data.modalidade === "outra" ? data.outraModalidade : "Presencial individual");
+    sections.forEach(([key, label]) => addBlock(label, data[key]));
+    addBlock("Nome da psicóloga", data.psicologa);
+    addBlock("CRP", data.crp);
+    if (y > 265) { pdf.addPage(); y = 20; }
+    y += 8; pdf.line(55, y, 155, y); y += 6;
+    pdf.text("Assinatura da psicóloga", 105, y, { align: "center" });
+    pdf.save("registro-atendimento-individual.pdf");
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-5xl">
+  const inputClass = "w-full rounded-lg border border-gray-300 p-3";
+  const labelClass = "mb-1 block text-sm font-medium text-gray-700";
 
-        <button onClick={onBack} className="mb-4 text-sm text-gray-600">
-          ← Voltar
-        </button>
-
-        {!submitted ? (
-          <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow">
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Psicoterapia Individual e em Grupo
-            </h1>
-
-            <div className="grid grid-cols-2 gap-4">
-              <input name="nome" placeholder="Nome" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="prontuario" placeholder="Prontuário" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="sexo" placeholder="Sexo" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="idade" placeholder="Idade" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="nomeMae" placeholder="Nome da Mãe" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="idadeMae" placeholder="Idade da Mãe" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="nomePai" placeholder="Nome do Pai" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="idadePai" placeholder="Idade do Pai" onChange={handleChange} className="p-2 border rounded-lg" />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <input name="sessao" placeholder="Sessão" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input type="date" placeholder="Data da sesseão" name="data" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="diaSemana" placeholder="Dia da Semana" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="horario" placeholder="Horário" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="sala" placeholder="Sala" onChange={handleChange} className="p-2 border rounded-lg" />
-            </div>
-
-            <textarea name="queixa" placeholder="Queixa Inicial" onChange={handleChange} className="w-full p-2 border rounded-lg" />
-            <textarea name="descricao" placeholder="Descrição da Sessão" onChange={handleChange} className="w-full p-2 border rounded-lg" />
-            <textarea name="analise" placeholder="Análise da Sessão" onChange={handleChange} className="w-full p-2 border rounded-lg" />
-
-            <div className="grid grid-cols-2 gap-4">
-              <input name="psicologo" placeholder="Nome do Psicólogo" onChange={handleChange} className="p-2 border rounded-lg" />
-              <input name="crp" placeholder="CRP" onChange={handleChange} className="p-2 border rounded-lg" />
-            </div>
-
-            <button className="w-full bg-black text-white py-2 rounded-lg">
-              Finalizar
-            </button>
-          </form>
-        ) : (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Relatório pronto</h2>
-
-            <button
-              onClick={handleDownloadPDF}
-              className="w-full bg-black text-white py-3 rounded-lg"
-            >
-              Baixar PDF
-            </button>
-          </div>
-        )}
+  return <main className="mx-auto min-h-screen w-full max-w-3xl p-4 sm:p-8">
+    <button type="button" onClick={onBack} className="no-print mb-4 text-sm text-gray-600">← Voltar</button>
+    {!ready ? <form onSubmit={(event) => { event.preventDefault(); setReady(true); }} className="space-y-5 rounded-2xl bg-white p-5 shadow sm:p-8">
+      <h1 className="text-2xl font-bold text-gray-800">Registro de atendimento psicológico individual</h1>
+      <div><label className={labelClass} htmlFor="nome">Identificação da pessoa atendida</label><input className={inputClass} id="nome" name="nome" value={data.nome} onChange={update} required autoComplete="off" /></div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div><label className={labelClass} htmlFor="data">Data do atendimento</label><input className={inputClass} id="data" name="data" type="date" value={data.data} onChange={update} required /></div>
+        <div><label className={labelClass} htmlFor="horario">Horário do atendimento</label><input className={inputClass} id="horario" name="horario" type="time" value={data.horario} onChange={update} required /></div>
       </div>
-    </div>
-  );
+      <div><label className={labelClass} htmlFor="modalidade">Modalidade</label><select className={inputClass} id="modalidade" name="modalidade" value={data.modalidade} onChange={update}><option value="presencial individual">Presencial individual</option><option value="outra">Outra modalidade</option></select></div>
+      {data.modalidade === "outra" && <div><label className={labelClass} htmlFor="outraModalidade">Especifique a modalidade</label><input className={inputClass} id="outraModalidade" name="outraModalidade" value={data.outraModalidade} onChange={update} required /></div>}
+      {sections.map(([key, label]) => <div key={key}><label className={labelClass} htmlFor={key}>{label}</label><textarea className={inputClass} id={key} name={key} value={data[key]} onChange={update} rows={5} /></div>)}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div><label className={labelClass} htmlFor="psicologa">Nome e assinatura da psicóloga</label><input className={inputClass} id="psicologa" name="psicologa" value={data.psicologa} onChange={update} required autoComplete="off" /></div><div><label className={labelClass} htmlFor="crp">Número de registro profissional (CRP)</label><input className={inputClass} id="crp" name="crp" value={data.crp} onChange={update} required autoComplete="off" /></div></div>
+      <button className="no-print w-full rounded-lg bg-teal-700 py-3 font-medium text-white hover:bg-teal-800">Continuar para gerar PDF</button>
+    </form> : <section className="space-y-4 rounded-2xl bg-white p-6 shadow"><h1 className="text-xl font-semibold">Registro preparado</h1><p>O PDF será gerado com os dados preenchidos nesta sessão.</p><button type="button" onClick={downloadPdf} className="no-print w-full rounded-lg bg-teal-700 py-3 text-white">Baixar PDF</button><button type="button" onClick={() => setReady(false)} className="no-print w-full rounded-lg border py-3">Voltar e revisar</button></section>}
+  </main>;
 }

@@ -1,6 +1,4 @@
 import { useState } from "react";
-import Contrato from "../components/Contrato";
-import Mensalidades from "../components/Mensalidades";
 import DocInicial from "../components/DocInicial";
 import FormularioPAS from "../components/FormularioPAS";
 import FormularioPsicoterapia from "../components/FormularioPsicoterapia";
@@ -10,23 +8,19 @@ import FormularioEvolucaoIndividual from "../components/FormularioEvolucaoIndivi
 import FormularioEncerramento from "../components/FormularioEncerramento";
 
 const forms = [
-  ["contrato", "Contrato"],
-  ["docinicial", "Avaliação Psicológica Inicial / Sessão de Início"],
-  ["pas", "Relatório PAS / Sessão inicial"],
-  ["psicoterapia", "Psicoterapia Individual / Sessão Rotina"],
-  ["mensalidades", "Controle de Mensalidades (em manutenção)"],
-  ["grupal", "Registro de atividade psicológica grupal"],
-  ["encaminhamento", "Registro de Encaminhamento"],
-  ["encerramento", "Registro de Encerramento"],
+  ["docinicial", "Avaliação Psicológica Inicial"],
+  ["pas", "Relatório PAS / Sessão Inicial"],
+  ["psicoterapia", "Atendimento Psicológico Individual"],
+  ["grupal", "Atividade Psicológica Grupal"],
+  ["encaminhamento", "Registro de Encaminhamento — Parte A"],
   ["evolucaoIndividual", "Evolução Psicológica Individual"],
+  ["encerramento", "Registro de Encerramento — Parte B"],
 ];
 
 export default function Menu() {
   const [screen, setScreen] = useState("menu");
   const onBack = () => setScreen("menu");
   const activeForms = {
-    contrato: <Contrato onBack={onBack} />,
-    mensalidades: <Mensalidades onBack={onBack} />,
     docinicial: <DocInicial onBack={onBack} />,
     pas: <FormularioPAS onBack={onBack} />,
     psicoterapia: <FormularioPsicoterapia onBack={onBack} />,
