@@ -1,84 +1,50 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Contrato from "../components/Contrato";
+import Mensalidades from "../components/Mensalidades";
 import DocInicial from "../components/DocInicial";
 import FormularioPAS from "../components/FormularioPAS";
 import FormularioPsicoterapia from "../components/FormularioPsicoterapia";
-import Mensalidades from "../components/Mensalidades";
+import FormularioGrupal from "../components/FormularioGrupal";
+import FormularioEncaminhamento from "../components/FormularioEncaminhamento";
+import FormularioEvolucaoIndividual from "../components/FormularioEvolucaoIndividual";
+import FormularioEncerramento from "../components/FormularioEncerramento";
+
+const forms = [
+  ["contrato", "Contrato"],
+  ["docinicial", "Avaliação Psicológica Inicial / Sessão de Início"],
+  ["pas", "Relatório PAS / Sessão inicial"],
+  ["psicoterapia", "Psicoterapia Individual / Sessão Rotina"],
+  ["mensalidades", "Controle de Mensalidades (em manutenção)"],
+  ["grupal", "Registro de atividade psicológica grupal"],
+  ["encaminhamento", "Registro de Encaminhamento"],
+  ["encerramento", "Registro de Encerramento"],
+  ["evolucaoIndividual", "Evolução Psicológica Individual"],
+];
 
 export default function Menu() {
   const [screen, setScreen] = useState("menu");
+  const onBack = () => setScreen("menu");
+  const activeForms = {
+    contrato: <Contrato onBack={onBack} />,
+    mensalidades: <Mensalidades onBack={onBack} />,
+    docinicial: <DocInicial onBack={onBack} />,
+    pas: <FormularioPAS onBack={onBack} />,
+    psicoterapia: <FormularioPsicoterapia onBack={onBack} />,
+    grupal: <FormularioGrupal onBack={onBack} />,
+    encaminhamento: <FormularioEncaminhamento onBack={onBack} />,
+    encerramento: <FormularioEncerramento onBack={onBack} />,
+    evolucaoIndividual: <FormularioEvolucaoIndividual onBack={onBack} />,
+  };
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-10">
-
-        {screen === "menu" && (
-          <div className="space-y-8 text-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">Centro de Recuperação Átrio</h1>
-              <p className="text-sm text-gray-400 mt-1">Sistema de Gestão</p>
-            </div>
-
-            <div className="flex flex-col gap-4 mt-6">
-              <button
-                onClick={() => setScreen("contrato")}
-                className="bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition font-medium"
-              >
-                📄 Contrato
-              </button>
-
-              <button
-                onClick={() => setScreen("docinicial")}
-                className="bg-teal-600 text-white py-3 rounded-xl hover:bg-teal-700 transition font-medium"
-              >
-                ✅ Avaliação Psicológica Inicial / Sessão de Início
-              </button>
-
-              <button
-                onClick={() => setScreen("pas")}
-                className="bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-medium"
-              >
-                📋 Relatório PAS / Sessão inicial
-              </button>
-
-              <button
-                onClick={() => setScreen("psicoterapia")}
-                className="bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition font-medium"
-              >
-                🧠 Psicoterapia Individual / Sessão Rotina
-              </button>
-
-              <button
-                onClick={() => setScreen("mensalidades")}
-                className="bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-700 transition font-medium"
-              >
-                em manutenção!!!!  💰 Controle de Mensalidades
-              </button>
-            </div>
-          </div>
-        )}
-
-        {screen === "contrato" && (
-          <Contrato onBack={() => setScreen("menu")} />
-        )}
-
-        {screen === "docinicial" && (
-          <DocInicial onBack={() => setScreen("menu")} />
-        )}
-
-        {screen === "pas" && (
-          <FormularioPAS onBack={() => setScreen("menu")} />
-        )}
-
-        {screen === "psicoterapia" && (
-          <FormularioPsicoterapia onBack={() => setScreen("menu")} />
-        )}
-
-        {screen === "mensalidades" && (
-          <Mensalidades onBack={() => setScreen("menu")} />
-        )}
-
-      </div>
-    </div>
-  );
+  return <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
+    {screen === "menu" ? <main className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white p-5 shadow-lg sm:mt-16 sm:p-10">
+      <header className="text-center">
+        <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">Centro de Recuperação Átrio</h1>
+        <p className="mt-1 text-sm text-gray-500">Formulários do Serviço de Psicologia</p>
+      </header>
+      <nav aria-label="Formulários" className="mt-8 flex flex-col gap-3">
+        {forms.map(([id, label]) => <button key={id} type="button" onClick={() => setScreen(id)} className="rounded-xl bg-teal-700 px-4 py-3 text-left font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">{label}</button>)}
+      </nav>
+    </main> : activeForms[screen]}
+  </div>;
 }
